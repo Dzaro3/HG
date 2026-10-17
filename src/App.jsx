@@ -2,11 +2,41 @@ import { useState } from 'react';
 
 export default function App() {
   // To jest nasz JavaScript (Mózg) - stan aplikacji
-  const [dane, setDane] = useState("Brak pobranych danych");
+  const [data, setData] = useState("Brak pobranych danych");
 
-  function pobierzDane() {
-    // Tu na labach wpiszesz fetch(), teraz symulujemy akcję:
-    setDane("Udało się! Pobrałeś dane z serwera (metoda GET).");
+  async function getData() {
+    setData("Pobieram dane z serwera...");
+    try{
+      const answer = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+      const objectJson = await answer.json();
+      setData(`Sukces! Pobrany tytuł: "${objectJson.title}"`);
+    } catch (error) {
+      setData("Błąd: nie udało się połączyć z serwerem.");
+    }
+
+  }
+
+  async function sendData() {
+    setData("Wysyłam dane na serwer...");
+    try {
+      const answer = await fetch('https://jsonplaceholder.typicode.com/posts', {
+        method: 'POST', // Zmieniamy metodę na wysyłanie
+        headers: {
+          'Content-Type': 'application/json', // Mówimy serwerowi, że wysyłamy JSON-a
+        },
+        body: JSON.stringify({
+          title: 'Mój nowy wpis z labów',
+          body: 'To jest treść wpisu wysłanego z Reacta.',
+          userId: 1,
+        }),
+      });
+      
+      const objectJson = await answer.json();
+      // Serwer JSONPlaceholder symuluje zapis i zwraca nam wygenerowane ID:
+      setData(`Sukces! Utworzono wpis. Serwer nadał mu ID: ${objectJson.id}`);
+    } catch (error) {
+      setData("Błąd: nie udało się wysłać danych.");
+    }
   }
 
   // To jest nasz HTML + CSS (Zwracany Interfejs)
@@ -43,13 +73,20 @@ export default function App() {
           <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
             <h3 className="font-bold text-blue-900 mb-2">Test Komunikacji</h3>
             <p className="font-mono text-sm text-blue-800 bg-white p-2 rounded mb-4 shadow-inner">
-              Status: {dane}
+              Status: {data}
             </p>
             <button 
-              onClick={pobierzDane}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors"
+              onClick={getData}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors mr-2"
             >
               Wykonaj zapytanie (GET)
+            </button>
+  
+            <button 
+              onClick={sendData}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition-colors"
+            >
+              Wyślij nowe dane (POST)
             </button>
           </div>
         </main>
@@ -66,7 +103,7 @@ export default function App() {
 
       {/* 3. FOOTER (Stopka) */}
       <footer className="bg-gray-800 text-gray-200 p-4 text-center text-sm mt-auto">
-        2026
+        Semba Si 2026
       </footer>
 
     </div>
